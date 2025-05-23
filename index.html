@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניתוח אינטראקטיבי: יחס הרבנים להרצל</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices:
+        - Report Info: Comparison of Rabbis' views on Herzl. Goal: Inform & Compare. Viz/Presentation: Structured text sections, highlighted quotes, side-by-side comparison layout (HTML/Tailwind grid), and a conceptual bar chart (Chart.js) comparing aspects of their views. Interaction: Navigation clicks. Justification: Clear presentation of complex theological/historical views, with a visual aid for comparison. Library/Method: HTML, Tailwind CSS, Vanilla JS for navigation, Chart.js for visualization.
+        - Report Info: Explanation of terms like "Tinok Shenishba". Goal: Inform. Viz/Presentation: Textual explanations within context. Interaction: None specific, part of readable text. Justification: Clarity of key concepts. Library/Method: HTML.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+        -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Tailwind's default sans-serif often includes Inter or a similar font */
+        }
+        .active-nav-link {
+            color: #b45309; /* amber-700 */
+            border-bottom-width: 2px;
+            border-color: #b45309; /* amber-700 */
+        }
+        .nav-link:hover {
+            color: #92400e; /* amber-800 */
+        }
+        h2 {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            color: #92400e; /* amber-800 for stronger headers */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        h3 {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 600; /* font-semibold */
+            color: #b45309; /* amber-700 */
+            margin-top: 1.5rem; /* mt-6 */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* max-w-2xl more or less */
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px; /* h-80 */
+            max-height: 400px;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 400px; /* h-96 */
+            }
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800 leading-relaxed">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-amber-700">יחס הרבנים להרצל</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
+                        <a href="#intro" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700">מבוא</a>
+                        <a href="#ramakh" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700">הרב כלפון הכהן</a>
+                        <a href="#raayah" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700">הרב קוק</a>
+                        <a href="#comparison" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700">השוואה</a>
+                        <a href="#north-africa" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700">יהדות צפון אפריקה</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobile-menu-button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-stone-400 hover:text-stone-500 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">פתח תפריט ראשי</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#intro" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-stone-700">מבוא</a>
+                <a href="#ramakh" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-stone-700">הרב כלפון הכהן</a>
+                <a href="#raayah" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-stone-700">הרב קוק</a>
+                <a href="#comparison" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-stone-700">השוואה</a>
+                <a href="#north-africa" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-stone-700">יהדות צפון אפריקה</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <section id="intro" class="mb-16 scroll-mt-20">
+            <div class="content-card">
+                <h2>מבוא: יחס הרבנים להרצל ולציונות</h2>
+                <p class="mb-4">
+                    דוח זה סוקר את יחסם של שני רבנים מרכזיים, רבי משה כלפון הכהן (הרמ"ך) והרב אברהם יצחק הכהן קוק (הראי"ה), כלפי בנימין זאב הרצל והתנועה הציונית. שניהם ראו בציונות תהליך חיובי בעל משמעות של "אתחלתא דגאולה", אך גישותיהם נבעו מנקודות מבט שונות והתבטאו בדגשים אחרים. אפליקציה זו נועדה להציג את עמדותיהם, להשוות ביניהן ולבחון את ההקשר הרחב יותר של יחס יהדות צפון אפריקה לסוגיות אלו.
+                </p>
+                <p>
+                    מטרת האפליקציה היא לאפשר הבנה מעמיקה של הניואנסים בתפיסותיהם של מנהיגים רוחניים אלו כלפי התנועה הלאומית היהודית ומייסדה, ולהקל על המשתמש לחקור ולהבין את המורכבות ההיסטורית והתאולוגית של הנושא.
+                </p>
+            </div>
+        </section>
+
+        <section id="ramakh" class="mb-16 scroll-mt-20">
+            <div class="content-card">
+                <h2>הרב משה כלפון הכהן (הרמ"ך)</h2>
+                <p class="mb-4">הרב משה כלפון הכהן, רבה הראשי של ג'רבה, היה ידוע כתומך נלהב של התנועה הציונית ושל הרצל. הוא ראה בפעילותם צעד משמעותי לקראת גאולת עם ישראל.</p>
+                
+                <h3>נקודות מרכזיות בתפיסתו:</h3>
+                <ul class="list-disc list-inside space-y-2 mb-4">
+                    <li><strong>ציוני נלהב:</strong> תמך באופן פעיל בציונות וראה בהרצל דמות מפתח.</li>
+                    <li><strong>הערכה להרצל:</strong> כינה את הרצל <strong class="text-amber-700">"איש רם המעלה, זך השכל וחד הרעיון"</strong>.</li>
+                    <li><strong>הכרה בפעילות מדינית:</strong> העריך את מאמציו הדיפלומטיים של הרצל להשגת הכרה בינלאומית בזכות היהודים על ארץ ישראל.</li>
+                    <li><strong>אתחלתא דגאולה:</strong> ראה בהחלטות בינלאומיות, כמו ועידת סן רמו, התחלה של גאולה, ואף התיר אמירת הלל (ללא ברכה) לציון מאורעות אלו.</li>
+                    <li><strong>"תינוק שנשבה":</strong> התייחס להרצל כאל <strong class="text-amber-700">"תינוק שנשבה לבין הגויים"</strong>. כינוי זה, שמקורו בהלכה, מתאר אדם שלא זכה לחינוך יהודי מלא ולכן אינו אחראי לחלוטין למעשיו או לאורח חייו. אין בכך כדי לגרוע מהערכתו לפועלו הלאומי של הרצל, אלא להסביר את ריחוקו משמירת מצוות מנקודת מבט הלכתית מכילה.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="raayah" class="mb-16 scroll-mt-20">
+            <div class="content-card">
+                <h2>הרב אברהם יצחק הכהן קוק (הראי"ה)</h2>
+                <p class="mb-4">יחסו של הרב קוק להרצל ולציונות היה מורכב ועמוק, והוא שילב אותם בתוך תפיסת גאולה רחבה וכוללת. כהוגה דעות רוחני, הוא ביקש לחבר את המגמות הלאומיות, גם החילוניות, אל הקודש ואל תהליכים אלוקיים.</p>
+
+                <h3>נקודות מרכזיות בתפיסתו:</h3>
+                <ul class="list-disc list-inside space-y-2 mb-4">
+                    <li><strong>"משיח בן יוסף":</strong> ראה בהרצל ובתנועה הציונית גילוי של <strong class="text-amber-700">"משיח בן יוסף"</strong> – שלב ראשוני של גאולה המתמקד בהיבטים הגשמיים, המדיניים והמעשיים, המכין את הקרקע לגאולה הרוחנית השלמה (משיח בן דוד).</li>
+                    <li><strong>"המספד בירושלים":</strong> עם פטירתו של הרצל, נשא הרב קוק הספד מפורסם (שנודע כ"המספד בירושלים", אף שלא נישא בירושלים), בו שיבח את מסירות נפשו של הרצל לעם ישראל, למרות שלא היה שומר תורה ומצוות. הוא ראה בו כלי בידי ההשגחה העליונה.</li>
+                    <li><strong>מציאת הטוב והעלאתו:</strong> שאף למצוא את נקודות האור והטוב בכל תופעה בעם ישראל, גם בזרמים חילוניים, במטרה להעלותם אל הקודש. הוא התמקד בחזון הלאומי ובתנועה ההיסטורית שהוביל הרצל, וראה בהם ביטוי לרצון אלוקי לגאולת העם.</li>
+                    <li><strong>הציונות הולידה את הרצל:</strong> הדגיש כי התנועה הציונית, כהכרח היסטורי ותהליך אלוקי, היא זו ש"הולידה את הרצל ועשתה אותו למה שהיה".</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="comparison" class="mb-16 scroll-mt-20">
+            <div class="content-card">
+                <h2>השוואה בין יחסם של הרמ"ך והראי"ה</h2>
+                <p class="mb-4">אף ששני הרבנים תמכו בציונות וראו בהרצל דמות חיובית, היו הבדלים משמעותיים בגישותיהם ובדגשיהם:</p>
+                
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <h3 class="text-xl font-semibold text-amber-700">הערכה לפעילות המדינית</h3>
+                        <p><strong>הרמ"ך:</strong> התמקד בהצלחה המדינית המעשית ובהכרה הבינלאומית.</p>
+                        <p><strong>הראי"ה:</strong> ראה בפעילות המדינית חלק מהכנה רוחנית רחבה יותר של תהליך הגאולה.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-amber-700">יחס לזהות הדתית של הרצל</h3>
+                        <p><strong>הרמ"ך:</strong> "תינוק שנשבה" – גישה המכירה במגבלותיו הדתיות אך מצדיקה את פעולותיו מתוך הכלה.</p>
+                        <p><strong>הראי"ה:</strong> שילב את חילוניותו של הרצל בתפיסת גאולה רחבה, כ"כלי" בידי ההשגחה, לעיתים דווקא בשל כך.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-amber-700">היקף ההתייחסות</h3>
+                        <p><strong>הרמ"ך:</strong> התייחסות ממוקדת יותר לפעילותו של הרצל כצעד חשוב לגאולה.</p>
+                        <p><strong>הראי"ה:</strong> התייחסות פילוסופית וכוללנית, הרואה בהרצל והציונות חלק מתהליך קוסמי-אלוקי.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-amber-700">חיבור לקודש</h3>
+                        <p><strong>הרמ"ך:</strong> תמך בציונות ככלי להבאת הגאולה המעשית, גם אם מנהיגיה אינם דתיים באופן מלא.</p>
+                        <p><strong>הראי"ה:</strong> שאף לחבר את התנועה הציונית למשמעותה הרוחנית העמוקה ביותר.</p>
+                    </div>
+                </div>
+
+                <h3>האם הרמ"ך הפגין קרבה גדולה יותר?</h3>
+                <p class="mb-4">
+                    ניתן לטעון כי הרמ"ך הפגין קרבה רגשית ומעשית גדולה יותר להרצל כאדם וכמנהיג, עם הערכה ישירה ובלתי מסויגת לפועלו. גישתו הייתה פחות פילוסופית ויותר ממוקדת בתקווה המעשית.
+                    מנגד, הרב קוק העניק להרצל מעמד רוחני עמוק יותר, אך שמר על ריחוק מסוים מהדמות האישית החילונית, תוך מיסגור פעולותיו בהקשר תאולוגי רחב.
+                </p>
+
+                <h3>תרשים השוואתי (קונספטואלי)</h3>
+                <p class="mb-2">התרשים הבא מנסה להמחיש ויזואלית, באופן קונספטואלי, שני היבטים בהערכתם של הרבנים את הרצל. הערכים הם סמליים ונועדו להדגשה בלבד.</p>
+                <div class="chart-container">
+                    <canvas id="rabbisComparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="north-africa" class="scroll-mt-20">
+            <div class="content-card">
+                <h2>הקשר ליחס יהדות צפון אפריקה ליהודים לא-דתיים</h2>
+                <p class="mb-4">
+                    יחסו של הרמ"ך להרצל, ובפרט השימוש במונח "תינוק שנשבה", קשור באופן הדוק לגישה הכללית של יהדות צפון אפריקה כלפי יהודים שלא שמרו תורה ומצוות באופן מלא. גישה זו הייתה לרוב מכילה ופחות שיפוטית מאשר בחלקים אחרים של העולם היהודי.
+                </p>
+
+                <h3>רקע תרבותי-הלכתי ביהדות צפון אפריקה:</h3>
+                <ul class="list-disc list-inside space-y-2 mb-4">
+                    <li><strong>העדר פילוגים חריפים:</strong> לא התפתחו פילוגים אידיאולוגיים חריפים בין זרמים דתיים כפי שקרה באירופה. הקהילות נותרו מאוחדות יחסית.</li>
+                    <li><strong>זהות יהודית אינטגרלית:</strong> הזהות היהודית נתפסה כעמוקה וכוללת, ולא רק דרך שמירת מצוות קפדנית.</li>
+                    <li><strong>גישה הלכתית מכילה:</strong> פוסקי הלכה ספרדים נטו לגישה מקלה יותר, והשתמשו בכלים כמו "תינוק שנשבה" כדי לקרב ולא להרחיק.</li>
+                </ul>
+
+                <h3>השלכות על היחס לציונות ולהרצל:</h3>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>הכלה של מנהיגים חילוניים:</strong> היכולת לקבל מנהיגים כהרצל נבעה מהפרדה בין חילוניותו האישית לפועלו הלאומי.</li>
+                    <li><strong>ראיית התהליך הלאומי כחיובי:</strong> תמיכה בתנועה הציונית כהתחלת גאולה, גם אם הובלה על ידי אישים שאינם דתיים.</li>
+                    <li><strong>הדגשת האחדות:</strong> רצון לשמור על אחדות העם ולא להתפלג על רקע דתי-חילוני.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white border-t border-stone-200 mt-12">
+        <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-stone-500 text-sm">
+            <p>&copy; <span id="currentYear"></span> ניתוח אינטראקטיבי. כל הזכויות שמורות לתוכן המקורי.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Smooth scroll for navigation links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId.startsWith('#')) {
+                        e.preventDefault();
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                    // Close mobile menu if open
+                    if (mobileMenu.classList.contains('block') && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('block');
+                        mobileMenuButton.querySelector('svg.block').classList.remove('hidden');
+                        mobileMenuButton.querySelector('svg.hidden').classList.add('hidden');
+                    }
+                });
+            });
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function () {
+                    const expanded = this.getAttribute('aria-expanded') === 'true' || false;
+                    this.setAttribute('aria-expanded', !expanded);
+                    mobileMenu.classList.toggle('hidden');
+                    mobileMenu.classList.toggle('block');
+                    this.querySelector('svg.block').classList.toggle('hidden');
+                    this.querySelector('svg.hidden').classList.toggle('hidden');
+                });
+            }
+            
+            // Active nav link highlighting on scroll
+            const sections = document.querySelectorAll('section');
+            const desktopNavLinks = document.querySelectorAll('header nav .hidden.md\\:block .nav-link');
+            const mobileNavLinks = document.querySelectorAll('#mobile-menu .nav-link');
+
+            function changeActiveLink() {
+                let index = sections.length;
+
+                while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+                
+                desktopNavLinks.forEach((link) => link.classList.remove('active-nav-link'));
+                mobileNavLinks.forEach((link) => link.classList.remove('active-nav-link'));
+
+                if (desktopNavLinks[index]) desktopNavLinks[index].classList.add('active-nav-link');
+                if (mobileNavLinks[index]) mobileNavLinks[index].classList.add('active-nav-link');
+            }
+            changeActiveLink(); // Initial call
+            window.addEventListener('scroll', changeActiveLink);
+
+
+            // Chart.js: Rabbis Comparison Chart
+            const ctx = document.getElementById('rabbisComparisonChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['הרב כלפון הכהן (הרמ"ך)', 'הרב קוק (הראי"ה)'],
+                        datasets: [{
+                            label: 'מידת התמיכה הישירה והמעשית',
+                            data: [4.5, 3], // Conceptual values on a 1-5 scale
+                            backgroundColor: 'rgba(180, 83, 9, 0.6)', // amber-700 with opacity
+                            borderColor: 'rgba(180, 83, 9, 1)', // amber-700
+                            borderWidth: 1
+                        }, {
+                            label: 'מידת העומק הפילוסופי',
+                            data: [3, 5], // Conceptual values on a 1-5 scale
+                            backgroundColor: 'rgba(120, 113, 108, 0.6)', // stone-500 with opacity
+                            borderColor: 'rgba(120, 113, 108, 1)', // stone-500
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 5,
+                                title: {
+                                    display: true,
+                                    text: 'הערכה (סולם 1-5, קונספטואלי)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                bodyFont: {
+                                    family: 'Inter, sans-serif' // Ensure tooltip font matches
+                                },
+                                titleFont: {
+                                    family: 'Inter, sans-serif'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            // Set current year in footer
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>
